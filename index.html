@@ -1,0 +1,846 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🍶 お酒クイズ道場</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;700;900&family=Noto+Sans+JP:wght@400;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<script src="https://pecpec37-gift.github.io/portal/stamp.js"></script>
+<style>
+:root {
+  --bg: #1a1008;
+  --bg2: #231508;
+  --bg3: #2e1c0a;
+  --surface: #2a1a0c;
+  --surface2: #3a2510;
+  --border: rgba(200,150,60,0.18);
+  --gold: #c8961e;
+  --gold2: #f0c040;
+  --gold3: #fde88a;
+  --amber: #e07820;
+  --red: #c0392b;
+  --green: #27ae60;
+  --text: #f5e8c8;
+  --text2: rgba(245,232,200,0.7);
+  --text3: rgba(245,232,200,0.4);
+  --radius: 6px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;}
+body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse at 20% 20%,rgba(200,150,30,0.06) 0%,transparent 60%),radial-gradient(ellipse at 80% 80%,rgba(224,120,32,0.05) 0%,transparent 60%);pointer-events:none;z-index:0;}
+
+/* ===== SCREEN SYSTEM ===== */
+.screen{display:none;position:relative;z-index:1;}
+.screen.active{display:block;}
+
+/* ===== TOP ===== */
+#screen-top{min-height:100vh;}
+.top-hero{background:linear-gradient(160deg,#2e1a06 0%,#1a1008 50%,#0e0806 100%);padding:48px 24px 40px;text-align:center;border-bottom:1px solid var(--border);position:relative;overflow:hidden;}
+.top-hero::after{content:'🍶';position:absolute;right:-20px;bottom:-20px;font-size:160px;opacity:0.04;pointer-events:none;}
+.top-eyebrow{font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:0.22em;color:var(--gold);text-transform:uppercase;margin-bottom:12px;opacity:0.8;}
+.top-title{font-family:'Zen Kaku Gothic New',sans-serif;font-weight:900;font-size:clamp(36px,8vw,64px);line-height:1;letter-spacing:-0.02em;color:var(--text);margin-bottom:8px;}
+.top-title span{color:var(--gold2);}
+.top-sub{font-size:13px;color:var(--text2);letter-spacing:0.06em;margin-bottom:28px;}
+.top-rule{display:inline-block;background:rgba(200,150,30,0.08);border:1px solid rgba(200,150,30,0.2);border-radius:4px;padding:14px 20px;text-align:left;font-size:12px;line-height:2;color:var(--text2);}
+.top-rule strong{color:var(--gold2);}
+
+.genres-wrap{max-width:860px;margin:0 auto;padding:32px 20px 20px;}
+.genres-label{font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:0.2em;color:var(--text3);text-transform:uppercase;margin-bottom:16px;display:flex;align-items:center;gap:10px;}
+.genres-label::after{content:'';flex:1;height:1px;background:var(--border);}
+.genres-hint{font-size:12px;color:var(--gold);background:rgba(200,150,30,0.1);border:1px solid rgba(200,150,30,0.2);border-radius:4px;padding:8px 14px;margin-bottom:20px;text-align:center;letter-spacing:0.04em;}
+.genres-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px;margin-bottom:24px;}
+.genre-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px 16px;cursor:pointer;transition:transform 0.12s,box-shadow 0.12s,border-color 0.12s;position:relative;overflow:hidden;}
+.genre-card::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(200,150,30,0.06),transparent);opacity:0;transition:opacity 0.15s;}
+.genre-card:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,0.4);border-color:rgba(200,150,30,0.4);}
+.genre-card:hover::before{opacity:1;}
+.genre-card:active{transform:translateY(0);}
+.genre-icon{font-size:28px;line-height:1;margin-bottom:8px;display:block;}
+.genre-name{font-family:'Zen Kaku Gothic New',sans-serif;font-weight:700;font-size:15px;margin-bottom:4px;color:var(--text);}
+.genre-count{font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--text3);letter-spacing:0.1em;}
+.genre-start{position:absolute;top:12px;right:12px;font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:0.1em;color:var(--gold);opacity:0;}
+.genre-card:hover .genre-start{opacity:1;}
+
+.ranking-btn-wrap{text-align:center;padding:8px 0 32px;}
+.ranking-btn{font-family:'Share Tech Mono',monospace;font-size:11px;letter-spacing:0.12em;padding:10px 24px;background:none;border:1px solid var(--border);color:var(--text3);border-radius:3px;cursor:pointer;transition:all 0.15s;}
+.ranking-btn:hover{border-color:var(--gold);color:var(--gold);}
+
+/* ===== INTRO ===== */
+#screen-intro{min-height:100vh;display:none;flex-direction:column;align-items:center;justify-content:center;padding:40px 24px;}
+#screen-intro.active{display:flex;}
+.intro-box{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:32px 28px;width:100%;max-width:400px;text-align:center;}
+.intro-genre-icon{font-size:48px;margin-bottom:12px;display:block;}
+.intro-genre-name{font-family:'Zen Kaku Gothic New',sans-serif;font-weight:900;font-size:22px;margin-bottom:4px;color:var(--gold2);}
+.intro-genre-desc{font-size:12px;color:var(--text3);margin-bottom:24px;}
+.intro-rule{font-size:12px;line-height:1.9;color:var(--text2);text-align:left;background:rgba(200,150,30,0.06);border-radius:4px;padding:12px 14px;margin-bottom:24px;}
+.intro-rule strong{color:var(--gold2);}
+.name-label{font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:0.18em;color:var(--text3);text-transform:uppercase;margin-bottom:6px;text-align:left;}
+.name-input{width:100%;background:var(--bg2);border:1px solid var(--border);border-radius:4px;padding:10px 14px;color:var(--text);font-family:'Noto Sans JP',sans-serif;font-size:14px;margin-bottom:16px;outline:none;transition:border-color 0.15s;}
+.name-input:focus{border-color:var(--gold);}
+.name-input::placeholder{color:var(--text3);}
+.start-btn{width:100%;padding:14px;background:var(--gold);color:#1a1008;font-family:'Zen Kaku Gothic New',sans-serif;font-weight:900;font-size:16px;border:none;border-radius:4px;cursor:pointer;transition:background 0.15s,transform 0.1s;letter-spacing:0.04em;}
+.start-btn:hover{background:var(--gold2);}
+.start-btn:active{transform:scale(0.98);}
+.back-link{margin-top:14px;font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--text3);cursor:pointer;transition:color 0.15s;background:none;border:none;}
+.back-link:hover{color:var(--text);}
+
+/* ===== QUIZ ===== */
+#screen-quiz{min-height:100vh;padding:0;}
+.quiz-header{background:var(--bg2);border-bottom:1px solid var(--border);padding:12px 20px;display:flex;align-items:center;gap:16px;flex-wrap:wrap;position:sticky;top:0;z-index:10;}
+.quiz-progress{flex:1;height:3px;background:rgba(200,150,30,0.15);border-radius:2px;overflow:hidden;min-width:60px;}
+.quiz-progress-fill{height:100%;background:var(--gold);border-radius:2px;transition:width 0.3s;}
+.quiz-qnum{font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--text3);white-space:nowrap;letter-spacing:0.08em;}
+.quiz-score{font-family:'Share Tech Mono',monospace;font-size:13px;color:var(--gold2);white-space:nowrap;}
+.quiz-timer-wrap{display:flex;align-items:center;gap:6px;}
+.quiz-timer{font-family:'Zen Kaku Gothic New',sans-serif;font-weight:900;font-size:22px;color:var(--gold2);min-width:40px;text-align:right;transition:color 0.3s;}
+.quiz-timer.danger{color:#e74c3c;animation:pulse 0.5s infinite alternate;}
+@keyframes pulse{from{opacity:1;}to{opacity:0.5;}}
+.quiz-timer-label{font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--text3);letter-spacing:0.1em;}
+
+.quiz-body{max-width:640px;margin:0 auto;padding:28px 20px 40px;}
+.quiz-type-badge{font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:0.16em;padding:3px 10px;border-radius:2px;display:inline-block;margin-bottom:16px;text-transform:uppercase;}
+.quiz-type-badge.type-4{background:rgba(200,150,30,0.15);color:var(--gold);}
+.quiz-type-badge.type-ox{background:rgba(39,174,96,0.15);color:#2ecc71;}
+.quiz-q{font-family:'Zen Kaku Gothic New',sans-serif;font-weight:700;font-size:clamp(16px,4vw,20px);line-height:1.6;margin-bottom:24px;color:var(--text);}
+.choices{display:flex;flex-direction:column;gap:10px;}
+.choice-btn{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 18px;text-align:left;font-family:'Noto Sans JP',sans-serif;font-size:14px;color:var(--text);cursor:pointer;transition:all 0.12s;display:flex;align-items:center;gap:12px;}
+.choice-btn:hover:not(:disabled){background:var(--surface2);border-color:rgba(200,150,30,0.4);transform:translateX(3px);}
+.choice-btn:disabled{cursor:default;}
+.choice-btn.correct{background:rgba(39,174,96,0.15);border-color:#27ae60;color:#2ecc71;}
+.choice-btn.wrong{background:rgba(192,57,43,0.15);border-color:#c0392b;color:#e74c3c;}
+.choice-label{font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--text3);min-width:20px;}
+.ox-choices{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.ox-btn{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:28px 16px;font-size:36px;cursor:pointer;transition:all 0.12s;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:6px;}
+.ox-btn span{font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--text3);letter-spacing:0.1em;}
+.ox-btn:hover:not(:disabled){transform:scale(1.03);border-color:rgba(200,150,30,0.4);}
+.ox-btn:disabled{cursor:default;}
+.ox-btn.correct{background:rgba(39,174,96,0.15);border-color:#27ae60;}
+.ox-btn.wrong{background:rgba(192,57,43,0.15);border-color:#c0392b;}
+
+.feedback-bar{margin-top:16px;padding:12px 16px;border-radius:4px;font-size:13px;font-weight:700;opacity:0;transition:opacity 0.2s;min-height:44px;}
+.feedback-bar.show{opacity:1;}
+.feedback-bar.ok{background:rgba(39,174,96,0.15);color:#2ecc71;border:1px solid rgba(39,174,96,0.3);}
+.feedback-bar.ng{background:rgba(192,57,43,0.12);color:#e74c3c;border:1px solid rgba(192,57,43,0.3);}
+.next-btn{margin-top:16px;width:100%;padding:12px;background:var(--gold);color:#1a1008;font-family:'Zen Kaku Gothic New',sans-serif;font-weight:900;font-size:15px;border:none;border-radius:4px;cursor:pointer;transition:background 0.15s;display:none;}
+.next-btn.show{display:block;}
+.next-btn:hover{background:var(--gold2);}
+
+/* ===== RESULT ===== */
+#screen-result{min-height:100vh;display:none;flex-direction:column;align-items:center;padding:40px 20px 60px;}
+#screen-result.active{display:flex;}
+.result-box{width:100%;max-width:520px;}
+.result-genre{font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:0.2em;color:var(--text3);text-transform:uppercase;margin-bottom:8px;text-align:center;}
+.result-score-wrap{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:28px;text-align:center;margin-bottom:20px;}
+.result-medal{font-size:48px;margin-bottom:8px;display:block;}
+.result-score{font-family:'Zen Kaku Gothic New',sans-serif;font-weight:900;font-size:64px;line-height:1;color:var(--gold2);}
+.result-score-label{font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:0.16em;color:var(--text3);margin-bottom:16px;text-transform:uppercase;}
+.result-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:16px;}
+.result-stat{background:var(--bg2);border-radius:4px;padding:12px 8px;text-align:center;}
+.result-stat-val{font-family:'Zen Kaku Gothic New',sans-serif;font-weight:900;font-size:24px;color:var(--gold2);}
+.result-stat-val.green{color:#2ecc71;}
+.result-stat-val.blue{color:#3498db;}
+.result-stat-label{font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:0.1em;color:var(--text3);margin-top:2px;}
+
+.result-actions{display:flex;gap:10px;margin-bottom:24px;}
+.result-btn{flex:1;padding:12px;font-family:'Zen Kaku Gothic New',sans-serif;font-weight:700;font-size:14px;border-radius:4px;cursor:pointer;transition:all 0.15s;}
+.result-btn-primary{background:var(--gold);color:#1a1008;border:none;}
+.result-btn-primary:hover{background:var(--gold2);}
+.result-btn-secondary{background:none;color:var(--text2);border:1px solid var(--border);}
+.result-btn-secondary:hover{border-color:var(--gold);color:var(--gold);}
+
+.wrong-section{width:100%;max-width:520px;}
+.wrong-label{font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:0.18em;color:var(--text3);text-transform:uppercase;margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;}
+.wrong-item{background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:16px;margin-bottom:10px;}
+.wrong-item-num{font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:0.14em;color:var(--text3);margin-bottom:6px;}
+.wrong-item-q{font-size:14px;line-height:1.6;color:var(--text);margin-bottom:10px;font-weight:700;}
+.wrong-item-ans{display:flex;align-items:flex-start;gap:8px;font-size:13px;}
+.wrong-item-ans-label{font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--green);background:rgba(39,174,96,0.12);padding:2px 7px;border-radius:2px;white-space:nowrap;margin-top:1px;}
+.wrong-item-ans-text{color:#2ecc71;line-height:1.5;}
+.portal-back{display:block;text-align:center;margin-top:28px;font-family:'Share Tech Mono',monospace;font-size:12px;letter-spacing:0.1em;color:var(--text3);text-decoration:none;padding:10px 20px;border:1px solid var(--border);border-radius:3px;transition:all 0.15s;}
+.portal-back:hover{border-color:var(--gold);color:var(--gold);}
+
+/* ===== RANKING ===== */
+#screen-ranking{min-height:100vh;padding:40px 20px 60px;}
+.ranking-wrap{max-width:600px;margin:0 auto;}
+.ranking-top{display:flex;align-items:center;gap:12px;margin-bottom:24px;}
+.ranking-title{font-family:'Zen Kaku Gothic New',sans-serif;font-weight:900;font-size:22px;color:var(--gold2);flex:1;}
+.ranking-back{font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--text3);background:none;border:1px solid var(--border);border-radius:3px;padding:6px 14px;cursor:pointer;transition:all 0.15s;}
+.ranking-back:hover{border-color:var(--gold);color:var(--gold);}
+.ranking-tabs{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;margin-bottom:20px;border-bottom:1px solid var(--border);}
+.ranking-tabs::-webkit-scrollbar{display:none;}
+.ranking-tab{flex-shrink:0;font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:0.1em;padding:10px 14px;background:none;border:none;border-bottom:2px solid transparent;color:var(--text3);cursor:pointer;transition:all 0.15s;white-space:nowrap;}
+.ranking-tab.active{color:var(--gold);border-bottom-color:var(--gold);}
+.ranking-list{display:flex;flex-direction:column;gap:6px;}
+.ranking-empty{font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--text3);text-align:center;padding:32px;letter-spacing:0.1em;}
+.ranking-row{display:flex;align-items:center;gap:12px;background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:12px 16px;}
+.ranking-row.top1{border-color:var(--gold);background:rgba(200,150,30,0.08);}
+.ranking-row.top2{border-color:rgba(200,200,200,0.3);background:rgba(200,200,200,0.04);}
+.ranking-row.top3{border-color:rgba(200,130,50,0.3);background:rgba(200,130,50,0.05);}
+.ranking-pos{font-family:'Zen Kaku Gothic New',sans-serif;font-weight:900;font-size:18px;min-width:28px;color:var(--text3);}
+.ranking-pos.gold{color:var(--gold2);}
+.ranking-pos.silver{color:#bdc3c7;}
+.ranking-pos.bronze{color:#cd7f32;}
+.ranking-name{flex:1;font-size:14px;font-weight:700;color:var(--text);}
+.ranking-score{font-family:'Zen Kaku Gothic New',sans-serif;font-weight:900;font-size:20px;color:var(--gold2);}
+.ranking-date{font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--text3);margin-left:8px;}
+.ranking-del{font-size:11px;color:var(--text3);background:none;border:none;cursor:pointer;padding:4px 8px;margin-top:12px;font-family:'Share Tech Mono',monospace;letter-spacing:0.08em;transition:color 0.15s;}
+.ranking-del:hover{color:#e74c3c;}
+
+/* ===== TOAST ===== */
+#toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:#1a1008;color:var(--gold2);font-family:'Share Tech Mono',monospace;font-size:12px;padding:10px 20px;border-radius:4px;border:1px solid var(--gold);z-index:9999;opacity:0;transition:all 0.3s;pointer-events:none;white-space:nowrap;}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+/* ===== PORTAL BACK BUTTON (fixed) ===== */
+.portal-fixed-btn{position:fixed;bottom:20px;left:20px;z-index:9999;display:inline-flex;align-items:center;gap:8px;padding:10px 18px;background:rgba(26,16,8,0.92);color:var(--gold2);font-family:'Share Tech Mono',monospace;font-size:12px;letter-spacing:0.08em;border-radius:3px;border:1px solid rgba(200,150,30,0.35);text-decoration:none;backdrop-filter:blur(6px);box-shadow:0 4px 16px rgba(0,0,0,0.4);transition:all 0.15s;white-space:nowrap;}
+.portal-fixed-btn:hover{background:rgba(26,16,8,0.98);border-color:rgba(200,150,30,0.7);transform:translateY(-1px);}
+
+@media(max-width:480px){
+  .top-hero{padding:32px 16px 28px;}
+  .genres-grid{grid-template-columns:1fr 1fr;}
+  .result-stats{grid-template-columns:repeat(3,1fr);}
+  .result-actions{flex-direction:column;}
+  .portal-fixed-btn{bottom:14px;left:14px;padding:8px 14px;font-size:11px;}
+}
+</style>
+</head>
+<body>
+
+<!-- ===== TOP ===== -->
+<div id="screen-top" class="screen active">
+  <div class="top-hero">
+    <div class="top-eyebrow">Tommy's Quiz Dojo</div>
+    <h1 class="top-title">お酒<span>クイズ</span>道場</h1>
+    <p class="top-sub">SAKE / WINE / BEER / WHISKY / COCKTAIL</p>
+    <div class="top-rule">
+      📋 制限時間：<strong>120秒</strong> ／ 各ジャンル<strong>10問</strong>ランダム出題<br>
+      ✅ 正解 → <strong>+10点</strong> ＋ 時間+5秒<br>
+      ❌ 不正解 → 減点なし ＋ 時間−5秒のペナルティ<br>
+      🏆 残り時間がそのままボーナス点に加算！<br>
+      【4択】と【○×】がランダムにミックスされます
+    </div>
+  </div>
+
+  <div class="genres-wrap">
+    <div class="genres-label">// ジャンルを選んでスタート</div>
+    <div class="genres-hint">👆 カードをクリックするとすぐに始められます</div>
+    <div class="genres-grid" id="genres-grid"></div>
+    <div class="ranking-btn-wrap">
+      <button class="ranking-btn" onclick="showRanking()">🏆 スコアランキングを見る</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== INTRO ===== -->
+<div id="screen-intro" class="screen">
+  <div class="intro-box">
+    <span class="intro-genre-icon" id="intro-icon"></span>
+    <div class="intro-genre-name" id="intro-name"></div>
+    <div class="intro-genre-desc" id="intro-desc"></div>
+    <div class="intro-rule">
+      制限時間：<strong>120秒</strong> ／ 10問ランダム出題（4択＋○×ミックス）<br>
+      ✅ 正解 → <strong>+10点</strong> ＋ 時間+5秒<br>
+      ❌ 不正解 → 減点なし ＋ 時間−5秒<br>
+      🏆 残り時間がそのままボーナス点に加算
+    </div>
+    <div class="name-label">// Your Name（ランキングに表示）</div>
+    <input class="name-input" id="name-input" type="text" maxlength="20" placeholder="プレーヤー名（任意）">
+    <button class="start-btn" id="start-btn" onclick="startGame()">スタート ▶</button>
+    <button class="back-link" onclick="showScreen('screen-top')">← 戻る</button>
+  </div>
+</div>
+
+<!-- ===== QUIZ ===== -->
+<div id="screen-quiz" class="screen">
+  <div class="quiz-header">
+    <div class="quiz-qnum" id="quiz-qnum">Q1 / 10</div>
+    <div class="quiz-progress"><div class="quiz-progress-fill" id="quiz-progress-fill" style="width:0%"></div></div>
+    <div class="quiz-score" id="quiz-score">0 pt</div>
+    <div class="quiz-timer-wrap">
+      <div class="quiz-timer" id="quiz-timer">120</div>
+      <div class="quiz-timer-label">秒</div>
+    </div>
+  </div>
+  <div class="quiz-body">
+    <div class="quiz-type-badge" id="quiz-type-badge">4択</div>
+    <div class="quiz-q" id="quiz-q"></div>
+    <div id="quiz-choices"></div>
+    <div class="feedback-bar" id="feedback-bar"></div>
+    <button class="next-btn" id="next-btn" onclick="nextQuestion()">次の問題へ →</button>
+  </div>
+</div>
+
+<!-- ===== RESULT ===== -->
+<div id="screen-result" class="screen">
+  <div class="result-box">
+    <div class="result-genre" id="result-genre"></div>
+    <div class="result-score-wrap">
+      <span class="result-medal" id="result-medal">🏆</span>
+      <div class="result-score" id="result-score">0</div>
+      <div class="result-score-label">TOTAL SCORE</div>
+      <div class="result-stats">
+        <div class="result-stat">
+          <div class="result-stat-val green" id="result-correct">0</div>
+          <div class="result-stat-label">正解数</div>
+        </div>
+        <div class="result-stat">
+          <div class="result-stat-val" id="result-wrong">0</div>
+          <div class="result-stat-label">不正解数</div>
+        </div>
+        <div class="result-stat">
+          <div class="result-stat-val blue" id="result-bonus">+0</div>
+          <div class="result-stat-label">時間ボーナス</div>
+        </div>
+      </div>
+    </div>
+    <div class="result-actions">
+      <button class="result-btn result-btn-primary" onclick="retryGame()">もう一度挑戦</button>
+      <button class="result-btn result-btn-secondary" onclick="showScreen('screen-top')">← トップへ</button>
+    </div>
+  </div>
+  <div class="wrong-section" id="wrong-section"></div>
+  <a class="portal-back" href="https://pecpec37-gift.github.io/portal/">← とみやんのゲームランド</a>
+</div>
+
+<!-- ===== RANKING ===== -->
+<div id="screen-ranking" class="screen">
+  <div class="ranking-wrap">
+    <div class="ranking-top">
+      <div class="ranking-title">🏆 スコアランキング</div>
+      <button class="ranking-back" onclick="showScreen('screen-top')">← トップへ</button>
+    </div>
+    <div class="ranking-tabs" id="ranking-tabs"></div>
+    <div class="ranking-list" id="ranking-list"></div>
+    <div style="text-align:center;margin-top:16px;">
+      <button class="ranking-del" id="ranking-del-btn" onclick="deleteRanking()">🗑️ このジャンルの記録を削除</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div id="toast"></div>
+
+<!-- ポータルに戻るボタン（固定） -->
+<a class="portal-fixed-btn" href="https://pecpec37-gift.github.io/portal/">← とみやんのゲームランド</a>
+
+<script>
+// ============================================================
+//  GENRES & QUESTIONS DATA
+// ============================================================
+const GENRES = [
+  { id:'sake',     icon:'🍶', name:'日本酒',          desc:'純米・吟醸・産地・造り方'},
+  { id:'wine',     icon:'🍷', name:'ワイン',            desc:'産地・品種・製法・マナー'},
+  { id:'beer',     icon:'🍺', name:'ビール・クラフト',  desc:'種類・原料・世界のビール'},
+  { id:'whisky',   icon:'🥃', name:'ウイスキー',        desc:'蒸留・熟成・銘柄・産地'},
+  { id:'cocktail', icon:'🍹', name:'カクテル・スピリッツ', desc:'レシピ・技法・ベース'},
+  { id:'world',    icon:'🌍', name:'世界のお酒',        desc:'各国の伝統酒・蒸留酒'},
+  { id:'trivia',   icon:'📖', name:'お酒の豆知識',      desc:'歴史・文化・マナー・雑学'},
+];
+
+const DB = {
+sake: [
+  {type:'4',q:'日本酒の原料として正しいものはどれか？',c:['米・水・麹','麦・水・酵母','ぶどう・水・酵母','サトウキビ・水・酵母'],a:0},
+  {type:'ox',q:'純米酒はアルコールを添加せずに造られる。',a:true},
+  {type:'4',q:'日本酒の「精米歩合60%」とはどういう意味か？',c:['米を40%削った','米を60%削った','米の60%が水','アルコール度数が60%'],a:0},
+  {type:'ox',q:'大吟醸は精米歩合50%以下の米を使用する。',a:true},
+  {type:'4',q:'「獺祭（だっさい）」の蔵元はどこか？',c:['山口県','新潟県','秋田県','京都府'],a:0},
+  {type:'ox',q:'日本酒の辛口・甘口を示す指標を「日本酒度」という。',a:true},
+  {type:'4',q:'新潟の代表的な日本酒ブランドはどれか？',c:['久保田','一ノ蔵','賀茂鶴','八海山'],a:3},
+  {type:'ox',q:'本醸造酒は醸造アルコールを添加したものである。',a:true},
+  {type:'4',q:'日本酒を醸造する際、米のデンプンを糖に変える役割を担うのは？',c:['麹（こうじ）','酵母','乳酸菌','水'],a:0},
+  {type:'ox',q:'にごり酒は完全に濾過された日本酒である。',a:false},
+  {type:'4',q:'「吟醸」と名乗るには精米歩合が何%以下の米を使用する必要があるか？',c:['60%','50%','70%','40%'],a:0},
+  {type:'ox',q:'日本酒のアルコール度数は一般的にビールより高い。',a:true},
+  {type:'4',q:'「灘五郷」がある都道府県はどこか？',c:['兵庫県','大阪府','京都府','奈良県'],a:0},
+  {type:'ox',q:'秋に出回る日本酒「ひやおろし」は春に搾ったものを秋まで貯蔵したものだ。',a:true},
+  {type:'4',q:'日本酒の燗（かん）の中で約50℃のものを何という？',c:['熱燗','上燗','ぬる燗','飛びきり燗'],a:0},
+  {type:'ox',q:'「生酒」は一切火入れをしていない日本酒のことだ。',a:true},
+  {type:'4',q:'次のうち東北地方の日本酒銘柄でないものはどれか？',c:['浦霞','南部美人','十四代','賀茂鶴'],a:3},
+  {type:'ox',q:'日本酒は古くから「百薬の長」と呼ばれてきた。',a:true},
+  {type:'4',q:'日本酒の甘辛を数値化した「日本酒度」でプラスの値は何を示すか？',c:['辛口','甘口','酸味が強い','苦味が強い'],a:0},
+  {type:'ox',q:'「純米大吟醸」は純米酒の中で最も精米歩合が低い（よく削る）ものだ。',a:true},
+  {type:'4',q:'日本酒の製造工程で、米と麹と水を混ぜて発酵させるタンクを何という？',c:['もろみ','麹室','酒母','留め仕込み'],a:0},
+  {type:'ox',q:'福島県は全国新酒鑑評会で金賞受賞数が多い産地の一つだ。',a:true},
+  {type:'4',q:'「ソムリエ」の日本酒版の資格名は何か？',c:['酒匠（さかしょう）','唎酒師（ききさけし）','日本酒師','醸造士'],a:1},
+  {type:'ox',q:'「古酒（こしゅ）」は3年以上熟成させた日本酒のことだ。',a:true},
+  {type:'4',q:'新潟の日本酒の特徴として最も有名なものはどれか？',c:['淡麗辛口','濃醇甘口','淡麗甘口','濃醇辛口'],a:0},
+  {type:'ox',q:'酵母は糖をアルコールと二酸化炭素に分解する。',a:true},
+  {type:'4',q:'「十四代」の蔵元がある都道府県はどこか？',c:['山形県','秋田県','岩手県','宮城県'],a:0},
+  {type:'ox',q:'日本酒の「生酛（きもと）造り」は現代的な手法である。',a:false},
+  {type:'4',q:'日本酒の「上立ち香（うわだちか）」とは何のことか？',c:['グラスに注いだときに漂う香り','口に含んだときの香り','飲み込んだ後の香り','製造中の香り'],a:0},
+  {type:'ox',q:'「醸造アルコール」は日本酒の品質を下げるために添加する。',a:false},
+],
+wine: [
+  {type:'4',q:'世界最大のワイン生産国（生産量）はどこか？（近年）',c:['イタリア','フランス','スペイン','アメリカ'],a:0},
+  {type:'ox',q:'シャンパンはフランスのシャンパーニュ地方で造られたスパークリングワインのみを指す。',a:true},
+  {type:'4',q:'「ボルドー」で主に使われる赤ワイン用ぶどう品種はどれか？',c:['カベルネ・ソーヴィニョン','ピノ・ノワール','シラー','サンジョヴェーゼ'],a:0},
+  {type:'ox',q:'白ワインは白ぶどうだけからしか造れない。',a:false},
+  {type:'4',q:'「ロゼワイン」の色は主にどのようにして出すか？',c:['赤ぶどうの皮を短時間漬け込む','白ワインと赤ワインを混ぜる','ぶどうの果肉が赤い','食用色素を加える'],a:0},
+  {type:'ox',q:'ワインのコルクが使われる前は油を含んだ麻ひもで瓶口を塞いでいた。',a:true},
+  {type:'4',q:'イタリアのトスカーナ産の有名赤ワインといえばどれか？',c:['キアンティ','バローロ','アマローネ','プロセッコ'],a:0},
+  {type:'ox',q:'デキャンタージュとはワインを別の容器に移し替えることだ。',a:true},
+  {type:'4',q:'ワインのヴィンテージとは何のことか？',c:['ぶどうの収穫年','醸造所の創業年','ワインの種類','熟成方法'],a:0},
+  {type:'ox',q:'辛口ワインは糖分がほとんど残っていない状態のものだ。',a:true},
+  {type:'4',q:'ドイツを代表する白ワイン用ぶどう品種はどれか？',c:['リースリング','シャルドネ','ソーヴィニョン・ブラン','ヴィオニエ'],a:0},
+  {type:'ox',q:'スペインのリオハはリオハ・アルタ、リオハ・アラベサ、リオハ・バハの3つのサブリージョンに分かれる。',a:true},
+  {type:'4',q:'「ピノ・ノワール」の産地として世界的に有名なフランスの地方はどこか？',c:['ブルゴーニュ','ボルドー','ローヌ','アルザス'],a:0},
+  {type:'ox',q:'ポートワインはポルトガルの強化ワインである。',a:true},
+  {type:'4',q:'ワインを保管する際の適切な温度はどれか？',c:['10〜15℃','0〜5℃','20〜25℃','25〜30℃'],a:0},
+  {type:'ox',q:'新世界ワインとは旧来のヨーロッパのワイン産地を指す。',a:false},
+  {type:'4',q:'「シャブリ」はどのぶどう品種から造られるか？',c:['シャルドネ','リースリング','ソーヴィニョン・ブラン','ピノ・グリ'],a:0},
+  {type:'ox',q:'ワインのタンニンは主に赤ワインの渋みの原因となる成分だ。',a:true},
+  {type:'4',q:'「ボジョレー・ヌーヴォー」はどの地域のワインか？',c:['ボジョレー地区（ブルゴーニュ）','ボルドー','シャンパーニュ','ローヌ'],a:0},
+  {type:'ox',q:'南半球では北半球と季節が逆なため、ヴィンテージの時期（収穫期）も異なる。',a:true},
+  {type:'4',q:'スパークリングワインの製法で「瓶内二次発酵」を行う方法を何というか？',c:['シャンパーニュ方式（トラディショナル）','タンク方式','炭酸ガス注入法','トランスファー方式'],a:0},
+  {type:'ox',q:'「アイスワイン」は凍った状態のぶどうから造られる甘口ワインである。',a:true},
+  {type:'4',q:'オーストラリアを代表するワイン産地はどこか？',c:['バロッサ・ヴァレー','ナパ・ヴァレー','マールボロ','メンドーサ'],a:0},
+  {type:'ox',q:'ワインのソムリエ資格はフランス発祥の概念である。',a:true},
+  {type:'4',q:'白ワインを製造する際、一般的に果皮を取り除いてから発酵させる。この工程を何というか？',c:['除梗・破砕（圧搾）','マセラシオン','デブルバージュ','バトナージュ'],a:0},
+  {type:'ox',q:'「アマローネ」はイタリアのヴェネト州で造られる赤ワインだ。',a:true},
+  {type:'4',q:'ワインのラベルに記載される「AOC（現AOP）」とはフランスの何を示すか？',c:['原産地呼称統制','収穫年','生産者名','糖度'],a:0},
+  {type:'ox',q:'シェリーはスペイン産の強化ワインである。',a:true},
+  {type:'4',q:'「マルゴー」はフランスのどの地方に属する産地か？',c:['ボルドー','ブルゴーニュ','ローヌ','ロワール'],a:0},
+  {type:'ox',q:'ワインは温度変化が激しい場所での保管が推奨される。',a:false},
+],
+beer: [
+  {type:'4',q:'ビールの主な原料として正しいものはどれか？',c:['麦芽・ホップ・水・酵母','米・麹・水・酵母','ぶどう・水・酵母','サトウキビ・水・酵母'],a:0},
+  {type:'ox',q:'ホップはビールの苦みと香りを加えるために使われる。',a:true},
+  {type:'4',q:'ラガービールとエールビールの主な違いは何か？',c:['発酵方法（下面・上面）','原料の種類','産地','アルコール度数'],a:0},
+  {type:'ox',q:'黒ビールは焙煎した麦芽を使って色と風味をつけている。',a:true},
+  {type:'4',q:'世界で最も消費量が多いビールのスタイルはどれか？（一般的に）',c:['ピルスナー','スタウト','IPA','ヴァイツェン'],a:0},
+  {type:'ox',q:'IPAは「インディアン・ペール・エール」の略だ。',a:true},
+  {type:'4',q:'ベルギーのビール文化は何年にユネスコの無形文化遺産に登録されたか？',c:['2016年','2010年','2020年','2005年'],a:0},
+  {type:'ox',q:'スタウトの代表的なブランドとしてギネスが有名だ。',a:true},
+  {type:'4',q:'「ヴァイツェン」とはどの国のビールスタイルか？',c:['ドイツ','ベルギー','チェコ','イギリス'],a:0},
+  {type:'ox',q:'クラフトビールとは大手メーカーが大量生産するビールのことだ。',a:false},
+  {type:'4',q:'チェコのピルゼン発祥のビールスタイルを何というか？',c:['ピルスナー','ポーター','ヴァイス','アルト'],a:0},
+  {type:'ox',q:'ビールの賞味期限は製造から約1年のものが多い。',a:true},
+  {type:'4',q:'セッションIPAとは何か？',c:['アルコール度数が低めのIPA','超高アルコールのIPA','フルーツを加えたIPA','熟成させたIPA'],a:0},
+  {type:'ox',q:'ランビックビールはベルギーの自然発酵ビールだ。',a:true},
+  {type:'4',q:'ビールをグラスに注ぐとき理想的な泡の割合（ビールと泡）はどれか？（一般的に）',c:['7:3','5:5','9:1','3:7'],a:0},
+  {type:'ox',q:'ドイツには「ビール純粋令」という法律があり、麦芽・ホップ・水・酵母以外の原料を禁じていた。',a:true},
+  {type:'4',q:'日本の大手ビールメーカーでないものはどれか？',c:['アサヒ','キリン','サッポロ','ニッカ'],a:3},
+  {type:'ox',q:'ポーターとスタウトは色が似ており、同じ系統のビールスタイルだ。',a:true},
+  {type:'4',q:'ビールのホップを加えない昔ながらのハーブ類を使ったビールを何というか？',c:['グルート（グルート・ビール）','ランビック','セゾン','クリーク'],a:0},
+  {type:'ox',q:'缶ビールは瓶ビールよりも光による劣化が起きにくい。',a:true},
+  {type:'4',q:'「オクトーバーフェスト」が開催される都市はどこか？',c:['ミュンヘン','ベルリン','ケルン','ハンブルク'],a:0},
+  {type:'ox',q:'ビールの発酵に使われる酵母はサッカロミセス・セレビシエという。',a:true},
+  {type:'4',q:'「スモーキー」な風味で知られるドイツのビールスタイルは？',c:['ラオホ','ヴァイツェン','ケルシュ','アルト'],a:0},
+  {type:'ox',q:'日本の「発泡酒」は麦芽使用率が一定以下のビール類税制上の区分だ。',a:true},
+  {type:'4',q:'ベルギーの「トラピスト・ビール」を醸造できる条件として必須なのは？',c:['修道院内で修道士が管理する醸造','特定の原料使用','特定の発酵方法','特定のアルコール度数'],a:0},
+],
+whisky: [
+  {type:'4',q:'スコッチウイスキーの主な原料は何か？',c:['大麦麦芽（モルト）','ライ麦','トウモロコシ','米'],a:0},
+  {type:'ox',q:'バーボンウイスキーはアメリカのケンタッキー州のみで生産される。',a:false},
+  {type:'4',q:'シングルモルトウイスキーとは何か？',c:['単一蒸留所の大麦麦芽のみで造ったウイスキー','複数の原料を混ぜたウイスキー','単一の樽から取り出したウイスキー','1年だけ熟成させたウイスキー'],a:0},
+  {type:'ox',q:'アイラ島のウイスキーはスモーキーな風味が特徴的なものが多い。',a:true},
+  {type:'4',q:'バーボンウイスキーに必要な樽はどれか？',c:['新樽のオーク樽（内側を焦がしたもの）','使い古しのシェリー樽','新樽のミズナラ樽','使い古しのバーボン樽'],a:0},
+  {type:'ox',q:'アイリッシュウイスキーは一般的に3回蒸留を行う。',a:true},
+  {type:'4',q:'「山崎蒸溜所」を保有する日本のメーカーはどこか？',c:['サントリー','ニッカ','キリン','アサヒ'],a:0},
+  {type:'ox',q:'スコッチウイスキーはスコットランドで最低3年間樽熟成させる必要がある。',a:true},
+  {type:'4',q:'「余市蒸溜所」が所在する都道府県はどこか？',c:['北海道','宮城県','長野県','鹿児島県'],a:0},
+  {type:'ox',q:'グレーンウイスキーはモルトウイスキーと同じ製法で造られる。',a:false},
+  {type:'4',q:'「ピート」とはウイスキー製造においてどんな役割があるか？',c:['麦芽を乾燥させる際に独特のスモーキーな風味をつける泥炭','甘みを加える天然甘味料','発酵を助ける菌の一種','熟成に使う樽の素材'],a:0},
+  {type:'ox',q:'ブレンデッドウイスキーはモルトとグレーンを混ぜたものだ。',a:true},
+  {type:'4',q:'「竹鶴政孝」が創設した蒸留所はどれか？',c:['余市蒸溜所','山崎蒸溜所','白州蒸溜所','宮城峡蒸留所'],a:0},
+  {type:'ox',q:'テネシーウイスキーはバーボンの一種で、炭素ろ過（チャコール・メローイング）を行う。',a:true},
+  {type:'4',q:'スコッチウイスキーの産地として「スペイサイド」が有名なのは何のため？',c:['多くの蒸留所が集中しフルーティなウイスキーが多い','ピーティなウイスキーが多い','バーボン樽熟成が主流','ライトな味わいのものが多い'],a:0},
+  {type:'ox',q:'「エンジェルズ・シェア（天使の分け前）」とは熟成中に蒸発するウイスキーのことだ。',a:true},
+  {type:'4',q:'アイルランドのウイスキーブランドでないものはどれか？',c:['ジェムソン','ブッシュミルズ','タラモア・デュー','グレンフィディック'],a:3},
+  {type:'ox',q:'日本のミズナラ樽で熟成させたウイスキーは独特のお香のような風味が出る。',a:true},
+  {type:'4',q:'ウイスキーの「熟成」において色と風味の多くはどこから来るか？',c:['樽（木材）','仕込み水','酵母','原料の穀物'],a:0},
+  {type:'ox',q:'スコットランドの「ロッホ・ローモンド」は湖の名前であり蒸留所名でもある。',a:true},
+  {type:'4',q:'バーボンのルールで「トウモロコシを何%以上使用」が必要か？',c:['51%以上','70%以上','90%以上','100%'],a:0},
+  {type:'ox',q:'カナディアンウイスキーは一般的にライトな味わいのものが多い。',a:true},
+  {type:'4',q:'「ザ・マッカラン」の蒸留所があるのはどの地域か？',c:['スペイサイド（スコットランド）','アイラ島','ハイランド','アイルランド'],a:0},
+  {type:'ox',q:'ウイスキーはワインと異なり、瓶詰め後もアルコール度数は変化しない。',a:true},
+  {type:'4',q:'ウイスキーの製造工程で「ポットスチル（単式蒸留器）」が主に使われるのはどれか？',c:['モルトウイスキー','グレーンウイスキー','バーボン','ブレンデッド全般'],a:0},
+],
+cocktail: [
+  {type:'4',q:'「マティーニ」のベースとなるスピリッツはどれか？',c:['ジン','ウォッカ','ラム','テキーラ'],a:0},
+  {type:'ox',q:'カクテル「モスコミュール」にはジンジャービアが使われる。',a:true},
+  {type:'4',q:'「マルガリータ」のベースはどのスピリッツか？',c:['テキーラ','メスカル','ラム','ジン'],a:0},
+  {type:'ox',q:'「カンパリ」はイタリアのビターリキュールだ。',a:true},
+  {type:'4',q:'「ブラッディ・マリー」に使われるジュースはどれか？',c:['トマトジュース','オレンジジュース','クランベリージュース','グレープフルーツジュース'],a:0},
+  {type:'ox',q:'「ジン・トニック」はジンとトニックウォーターを混ぜたカクテルだ。',a:true},
+  {type:'4',q:'「ダイキリ」のベースに使われるスピリッツはどれか？',c:['ラム','ジン','ウォッカ','テキーラ'],a:0},
+  {type:'ox',q:'テキーラはサボテンを原料としている。',a:false},
+  {type:'4',q:'「コスモポリタン」に使われるリキュールはどれか？',c:['トリプルセック（コアントロー）','カルーア','ミドリ','ベイリーズ'],a:0},
+  {type:'ox',q:'「ネグローニ」はジン・カンパリ・スイートベルモットで作るカクテルだ。',a:true},
+  {type:'4',q:'「ウォッカ」の主な原料はどれか？',c:['穀物（小麦・じゃがいも等）','サトウキビ','ぶどう','大麦麦芽'],a:0},
+  {type:'ox',q:'カクテル技法の「シェイク」はシェーカーを使って材料を混ぜる方法だ。',a:true},
+  {type:'4',q:'「カシスオレンジ」のベースとなるリキュールはどれか？',c:['クレーム・ド・カシス','カンパリ','コアントロー','ジャックダニエル'],a:0},
+  {type:'ox',q:'「ロングアイランドアイスティー」の材料にお茶は含まれない。',a:true},
+  {type:'4',q:'「ジン・フィズ」の材料に含まれないのはどれか？',c:['ジン','レモンジュース','砂糖','コーラ'],a:3},
+  {type:'ox',q:'テキーラの原料はアガベ（竜舌蘭）だ。',a:true},
+  {type:'4',q:'「アマレット」はどのような風味のリキュールか？',c:['アーモンド・杏仁の風味','コーヒーの風味','ミントの風味','ベリーの風味'],a:0},
+  {type:'ox',q:'「スクリュードライバー」はウォッカとオレンジジュースのカクテルだ。',a:true},
+  {type:'4',q:'「モヒート」の原産地（発祥）はどこか？',c:['キューバ','メキシコ','ブラジル','ジャマイカ'],a:0},
+  {type:'ox',q:'「カシャーサ」はブラジルのサトウキビから造る蒸留酒だ。',a:true},
+  {type:'4',q:'「ピニャ・コラーダ」に使われるジュースはどれか？',c:['パイナップルジュース','マンゴージュース','ライムジュース','グアバジュース'],a:0},
+  {type:'ox',q:'「カクテル」という言葉の語源にはさまざまな説があり定説はない。',a:true},
+  {type:'4',q:'「アイリッシュ・コーヒー」に使われるスピリッツはどれか？',c:['アイリッシュウイスキー','バーボン','スコッチ','ラム'],a:0},
+  {type:'ox',q:'アブサンはニガヨモギを原料とする高アルコール蒸留酒だ。',a:true},
+  {type:'4',q:'「ミドリ」はどのフルーツのリキュールか？',c:['メロン','ライチ','マンゴー','キウイ'],a:0},
+],
+world: [
+  {type:'4',q:'韓国の代表的な蒸留酒はどれか？',c:['焼酎（ソジュ）','マッコリ','マッカリ','チャミスル'],a:0},
+  {type:'ox',q:'中国の「白酒（バイジュウ）」は蒸留酒の一種だ。',a:true},
+  {type:'4',q:'メキシコの伝統的なアルコール飲料で、アガベを発酵させた醸造酒はどれか？',c:['プルケ','メスカル','テキーラ','カシャーサ'],a:0},
+  {type:'ox',q:'ロシアの「クワス」はビールに似た微アルコール発酵飲料だ。',a:true},
+  {type:'4',q:'エチオピアの伝統的なハチミツ酒を何というか？',c:['テジ','テフ','インジェラ','ベルハ'],a:0},
+  {type:'ox',q:'「グラッパ」はイタリアのぶどう搾りかす（ポマース）を原料とした蒸留酒だ。',a:true},
+  {type:'4',q:'ペルーの国民的蒸留酒「ピスコ」の原料は何か？',c:['ぶどう','サトウキビ','トウモロコシ','じゃがいも'],a:0},
+  {type:'ox',q:'アイスランドの「ブレニヴィン」はジャガイモを原料とする蒸留酒だ。',a:false},
+  {type:'4',q:'「アクアビット（アクアヴィット）」はどの地域の蒸留酒か？',c:['北欧（スカンジナビア）','東欧','中東','東南アジア'],a:0},
+  {type:'ox',q:'沖縄の「泡盛」はタイ米を原料とする日本の蒸留酒だ。',a:true},
+  {type:'4',q:'「ラキ」はどの国の伝統的な蒸留酒か？',c:['トルコ','ギリシャ','イランの一部でも飲まれるが、代表はトルコ','イタリア'],a:0},
+  {type:'ox',q:'ブラジルの「カイピリーニャ」はカシャーサをベースにしたカクテルだ。',a:true},
+  {type:'4',q:'フランスのノルマンディー産のりんごの蒸留酒を何というか？',c:['カルヴァドス','コニャック','アルマニャック','グラッパ'],a:0},
+  {type:'ox',q:'ウズベキスタンは戒律上アルコールが禁じられているためワイン生産はない。',a:false},
+  {type:'4',q:'「サケ爆弾」とはどんな飲み方か？',c:['日本酒をビールに落として飲む','日本酒をショットで飲む後ビールを追う','日本酒をウイスキーで割る','日本酒をジュースで割る'],a:0},
+  {type:'ox',q:'南アフリカはワイン生産国としても有名で、ステレンボッシュが代表的な産地だ。',a:true},
+  {type:'4',q:'「フェルネット」はどの国原産のビターリキュールか？',c:['イタリア','スペイン','フランス','ドイツ'],a:0},
+  {type:'ox',q:'ジョージア（グルジア）はワインの発祥地の一つとされ8000年以上の歴史がある。',a:true},
+  {type:'4',q:'チリの「カルメネール」はどの種類のお酒の品種か？',c:['ワイン（ぶどう品種）','ビール（ホップの品種）','ウイスキー（大麦の品種）','ラム（サトウキビの品種）'],a:0},
+  {type:'ox',q:'「ウゾ」はギリシャのアニス風味の蒸留酒だ。',a:true},
+],
+trivia: [
+  {type:'4',q:'お酒のアルコール分（エタノール）は何という化学式で表されるか？',c:['C₂H₅OH','CH₃OH','C₆H₁₂O₆','H₂O'],a:0},
+  {type:'ox',q:'アルコール分解の主な臓器は肝臓だ。',a:true},
+  {type:'4',q:'「乾杯」の習慣はどこから来たとされるか？（一説）',c:['毒殺を防ぐため杯を打ち合わせ飲み物をこぼし合った','神々への感謝のため空に向けて杯を掲げた','戦争終結の喜びを分かち合うため','農作業終了の合図'],a:0},
+  {type:'ox',q:'アルコールは血管を拡張させ、一時的に体が温かく感じさせる。',a:true},
+  {type:'4',q:'「空きっ腹でお酒を飲むと酔いやすい」のはなぜか？',c:['胃が空のためアルコールが素早く吸収されるから','空腹時はアルコール分解酵素が少ないから','空腹時は心拍数が高くアルコールが回りやすいから','空腹時は体温が低くアルコールが蒸発しないから'],a:0},
+  {type:'ox',q:'「二日酔い」の原因の一つはアルコールが分解された後に生じるアセトアルデヒドだ。',a:true},
+  {type:'4',q:'日本でお酒を飲める年齢は何歳からか？',c:['20歳以上','18歳以上','22歳以上','25歳以上'],a:0},
+  {type:'ox',q:'お酒を飲んだ後、水を飲むと体内のアルコール濃度が薄まり酔いにくくなる。',a:true},
+  {type:'4',q:'「ソムリエ（sommelier）」は元々何をする職業だったか？',c:['荷物を管理する召使い','ぶどうを栽培する農家','ワインを醸造する職人','貴族の料理人'],a:0},
+  {type:'ox',q:'日本酒・焼酎・ビール・ワインはすべて「醸造酒」に分類される。',a:false},
+  {type:'4',q:'アルコールが体に与える影響で「利尿作用」があるのはなぜか？',c:['ADH（抗利尿ホルモン）の分泌を抑制するから','腎臓を直接刺激するから','血圧を上昇させるから','血糖値を下げるから'],a:0},
+  {type:'ox',q:'「チャンポン（複数の酒類を混ぜて飲む）」は悪酔いしやすいという科学的根拠はないという説もある。',a:true},
+  {type:'4',q:'お酒の「醸造」と「蒸留」の最大の違いはどれか？',c:['蒸留は発酵後に加熱してアルコールを濃縮する','醸造は高温で一気に造る','蒸留は原料を発酵させない','醸造は機械のみで造る'],a:0},
+  {type:'ox',q:'「スパイスド・ラム」はラムにスパイスや香料を加えたものだ。',a:true},
+  {type:'4',q:'アルコール飲料の「度数」を表す「%（アルコール分）」とは何を意味するか？',c:['100mLあたりのエタノール量（mL）','100gあたりのエタノール量（g）','1Lあたりのエタノール量（mL）','総容量に対する砂糖の割合'],a:0},
+  {type:'ox',q:'お酒の歴史は少なくとも8000年以上前にさかのぼると考えられている。',a:true},
+  {type:'4',q:'「ペアリング」とはお酒の世界で何を指すか？',c:['料理とお酒の組み合わせ','2種類のお酒を混ぜること','グラスの選び方','ラベルのデザイン'],a:0},
+  {type:'ox',q:'エタノール（飲用アルコール）とメタノールは同じ物質だ。',a:false},
+  {type:'4',q:'「バーテンダー」の語源はどれか？（一説）',c:['バー（酒場）のカウンター（tender=世話をする人）','お酒を注ぐ棒（bar）を持つ人','酒場で番をする人（番人）','イギリスの古語で酒師匠'],a:0},
+  {type:'ox',q:'「晩酌」という習慣は日本の伝統的な文化の一つだ。',a:true},
+  {type:'4',q:'ハンガリーの貴腐ワイン「トカイ・アスー」の「アスー」とは何を意味するか？',c:['貴腐菌に侵されたぶどう','白ぶどうの品種名','ハンガリー語で黄金','特定の畑の名前'],a:0},
+],
+};
+
+// ============================================================
+//  STATE
+// ============================================================
+let currentGenre = null;
+let questions = [];
+let qIndex = 0;
+let score = 0;
+let correctCount = 0;
+let wrongCount = 0;
+let timeLeft = 120;
+let timer = null;
+let answered = false;
+let wrongAnswers = [];
+let playerName = '';
+let currentRankingGenre = null;
+
+// ============================================================
+//  UTILS
+// ============================================================
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+function showToast(msg, duration = 2500) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), duration);
+}
+
+// ============================================================
+//  GENRE CARDS
+// ============================================================
+function buildGenreCards() {
+  const grid = document.getElementById('genres-grid');
+  grid.innerHTML = GENRES.map(g => `
+    <div class="genre-card" onclick="selectGenre('${g.id}')">
+      <span class="genre-icon">${g.icon}</span>
+      <div class="genre-name">${g.name}</div>
+      <div class="genre-count">全${DB[g.id].length}問収録 ／ 10問ランダム出題</div>
+      <span class="genre-start">▶ START</span>
+    </div>`).join('');
+}
+
+function selectGenre(id) {
+  currentGenre = GENRES.find(g => g.id === id);
+  document.getElementById('intro-icon').textContent = currentGenre.icon;
+  document.getElementById('intro-name').textContent = currentGenre.name;
+  document.getElementById('intro-desc').textContent = currentGenre.desc;
+  // ポータルで保存した名前を自動セット
+  if (window.TomyStamp) {
+    const saved = TomyStamp.getPlayer();
+    const inp = document.getElementById('name-input');
+    if (saved && !inp.value) inp.value = saved;
+  }
+  showScreen('screen-intro');
+}
+
+// ============================================================
+//  GAME
+// ============================================================
+function startGame() {
+  playerName = document.getElementById('name-input').value.trim() || 'ゲスト';
+  if (window.TomyStamp && playerName !== 'ゲスト') TomyStamp.setPlayer(playerName);
+  questions = shuffle(DB[currentGenre.id]).slice(0, 10);
+  qIndex = 0;
+  score = 0;
+  correctCount = 0;
+  wrongCount = 0;
+  wrongAnswers = [];
+  showScreen('screen-quiz');
+  showQuestion();
+  startTimer();
+}
+
+function retryGame() {
+  showScreen('screen-intro');
+}
+
+function startTimer() {
+  clearInterval(timer);
+  timeLeft = 120;
+  updateTimerDisplay();
+  timer = setInterval(() => {
+    timeLeft--;
+    updateTimerDisplay();
+    if (timeLeft <= 0) {
+      clearInterval(timer);
+      endGame();
+    }
+  }, 1000);
+}
+
+function updateTimerDisplay() {
+  const el = document.getElementById('quiz-timer');
+  el.textContent = timeLeft;
+  el.className = 'quiz-timer' + (timeLeft <= 10 ? ' danger' : '');
+}
+
+function showQuestion() {
+  const q = questions[qIndex];
+  answered = false;
+  document.getElementById('quiz-qnum').textContent = `Q${qIndex + 1} / 10`;
+  document.getElementById('quiz-progress-fill').style.width = `${(qIndex / 10) * 100}%`;
+  document.getElementById('quiz-score').textContent = `${score} pt`;
+  document.getElementById('feedback-bar').className = 'feedback-bar';
+  document.getElementById('feedback-bar').textContent = '';
+  document.getElementById('next-btn').className = 'next-btn';
+
+  if (q.type === '4') {
+    document.getElementById('quiz-type-badge').textContent = '4択';
+    document.getElementById('quiz-type-badge').className = 'quiz-type-badge type-4';
+    document.getElementById('quiz-q').textContent = q.q;
+    const labels = ['A', 'B', 'C', 'D'];
+    document.getElementById('quiz-choices').innerHTML = q.c.map((c, i) =>
+      `<button class="choice-btn" onclick="answer4(${i})">
+        <span class="choice-label">${labels[i]}</span>${c}
+       </button>`
+    ).join('');
+  } else {
+    document.getElementById('quiz-type-badge').textContent = '○×';
+    document.getElementById('quiz-type-badge').className = 'quiz-type-badge type-ox';
+    document.getElementById('quiz-q').textContent = q.q;
+    document.getElementById('quiz-choices').innerHTML = `
+      <div class="ox-choices">
+        <button class="ox-btn" onclick="answerOX(true)">⭕<span>正しい</span></button>
+        <button class="ox-btn" onclick="answerOX(false)">❌<span>誤り</span></button>
+      </div>`;
+  }
+}
+
+function answer4(idx) {
+  if (answered) return;
+  answered = true;
+  const q = questions[qIndex];
+  const btns = document.querySelectorAll('.choice-btn');
+  btns.forEach(b => b.disabled = true);
+  const isCorrect = (idx === q.a);
+  btns[q.a].classList.add('correct');
+  if (!isCorrect) btns[idx].classList.add('wrong');
+  processAnswer(isCorrect, q.c[q.a], q.q);
+}
+
+function answerOX(val) {
+  if (answered) return;
+  answered = true;
+  const q = questions[qIndex];
+  const btns = document.querySelectorAll('.ox-btn');
+  btns.forEach(b => b.disabled = true);
+  const isCorrect = (val === q.a);
+  btns[q.a ? 0 : 1].classList.add('correct');
+  if (!isCorrect) btns[val ? 0 : 1].classList.add('wrong');
+  processAnswer(isCorrect, q.a ? '○（正しい）' : '×（誤り）', q.q);
+}
+
+function processAnswer(isCorrect, correctAns, qText) {
+  const fb = document.getElementById('feedback-bar');
+  if (isCorrect) {
+    score += 10;
+    correctCount++;
+    timeLeft = Math.min(timeLeft + 5, 999);
+    fb.textContent = '✅ 正解！ ＋5秒';
+    fb.className = 'feedback-bar ok show';
+  } else {
+    wrongCount++;
+    timeLeft = Math.max(timeLeft - 5, 0);
+    fb.textContent = `❌ 正解は「${correctAns}」（−5秒）`;
+    fb.className = 'feedback-bar ng show';
+    wrongAnswers.push({ q: qText, a: correctAns });
+  }
+  updateTimerDisplay();
+  document.getElementById('next-btn').className = 'next-btn show';
+}
+
+function nextQuestion() {
+  qIndex++;
+  if (qIndex >= 10) {
+    clearInterval(timer);
+    endGame();
+  } else {
+    showQuestion();
+  }
+}
+
+function endGame() {
+  clearInterval(timer);
+  const bonus = Math.max(timeLeft, 0);
+  const total = score + bonus;
+  const medal = correctCount >= 9 ? '🥇' : correctCount >= 7 ? '🥈' : correctCount >= 5 ? '🥉' : '😅';
+  document.getElementById('result-genre').textContent = currentGenre.icon + ' ' + currentGenre.name;
+  document.getElementById('result-score').textContent = total;
+  document.getElementById('result-medal').textContent = medal;
+  document.getElementById('result-correct').textContent = correctCount;
+  document.getElementById('result-wrong').textContent = wrongCount;
+  document.getElementById('result-bonus').textContent = '+' + bonus;
+
+  // 間違えた問題
+  const ws = document.getElementById('wrong-section');
+  if (wrongAnswers.length > 0) {
+    ws.innerHTML = `<div class="wrong-label">// ❌ 間違えた問題（${wrongAnswers.length}問）</div>` +
+      wrongAnswers.map((w, i) => `
+        <div class="wrong-item">
+          <div class="wrong-item-num">問${i + 1}</div>
+          <div class="wrong-item-q">${w.q}</div>
+          <div class="wrong-item-ans">
+            <span class="wrong-item-ans-label">正解</span>
+            <span class="wrong-item-ans-text">${w.a}</span>
+          </div>
+        </div>`).join('');
+  } else {
+    ws.innerHTML = '<div style="text-align:center;padding:20px;font-family:\'Share Tech Mono\',monospace;font-size:12px;color:var(--gold2);">🎉 全問正解！</div>';
+  }
+
+  // ランキング保存
+  saveRanking(currentGenre.id, playerName, total, correctCount);
+
+  // スタンプ送信
+  if (window.TomyStamp && playerName !== 'ゲスト') {
+    TomyStamp.send('sake-quiz', currentGenre.name, correctCount)
+      .then(r => {
+        if (r.ok) {
+          showToast('⭐ スタンプ獲得！ランキングに反映されます');
+        }
+      });
+  }
+
+  showScreen('screen-result');
+}
+
+// ============================================================
+//  RANKING (localStorage)
+// ============================================================
+const LS_KEY = 'sake_quiz_ranking';
+
+function saveRanking(genreId, name, score, correct) {
+  const data = JSON.parse(localStorage.getItem(LS_KEY) || '{}');
+  if (!data[genreId]) data[genreId] = [];
+  data[genreId].push({
+    name: name,
+    score: score,
+    correct: correct,
+    date: new Date().toLocaleDateString('ja-JP')
+  });
+  data[genreId].sort((a, b) => b.score - a.score);
+  data[genreId] = data[genreId].slice(0, 20);
+  localStorage.setItem(LS_KEY, JSON.stringify(data));
+}
+
+function showRanking() {
+  const tabs = document.getElementById('ranking-tabs');
+  tabs.innerHTML = GENRES.map(g =>
+    `<button class="ranking-tab" onclick="switchRankingTab('${g.id}',this)">${g.icon} ${g.name}</button>`
+  ).join('');
+  showScreen('screen-ranking');
+  const firstTab = tabs.querySelector('.ranking-tab');
+  switchRankingTab(GENRES[0].id, firstTab);
+}
+
+function switchRankingTab(id, btn) {
+  document.querySelectorAll('.ranking-tab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  currentRankingGenre = id;
+  renderRanking(id);
+}
+
+function renderRanking(id) {
+  const data = JSON.parse(localStorage.getItem(LS_KEY) || '{}');
+  const rows = data[id] || [];
+  const list = document.getElementById('ranking-list');
+  if (rows.length === 0) {
+    list.innerHTML = '<div class="ranking-empty">// まだ記録がありません</div>';
+    return;
+  }
+  list.innerHTML = rows.map((r, i) => {
+    const pos = i + 1;
+    const posClass = pos === 1 ? 'gold' : pos === 2 ? 'silver' : pos === 3 ? 'bronze' : '';
+    const rowClass = pos === 1 ? 'top1' : pos === 2 ? 'top2' : pos === 3 ? 'top3' : '';
+    return `<div class="ranking-row ${rowClass}">
+      <span class="ranking-pos ${posClass}">${pos}</span>
+      <span class="ranking-name">${r.name}</span>
+      <span style="font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--text3);">${r.correct}/10</span>
+      <span class="ranking-score">${r.score}</span>
+      <span class="ranking-date">${r.date}</span>
+    </div>`;
+  }).join('');
+}
+
+function deleteRanking() {
+  if (!currentRankingGenre) return;
+  if (!confirm(`「${GENRES.find(g=>g.id===currentRankingGenre)?.name}」の記録を削除しますか？`)) return;
+  const data = JSON.parse(localStorage.getItem(LS_KEY) || '{}');
+  delete data[currentRankingGenre];
+  localStorage.setItem(LS_KEY, JSON.stringify(data));
+  renderRanking(currentRankingGenre);
+}
+
+// ============================================================
+//  INIT
+// ============================================================
+buildGenreCards();
+</script>
+</body>
+</html>
