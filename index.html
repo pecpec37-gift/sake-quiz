@@ -102,7 +102,9 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 .quiz-type-badge{font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:0.16em;padding:3px 10px;border-radius:2px;display:inline-block;margin-bottom:16px;text-transform:uppercase;}
 .quiz-type-badge.type-4{background:rgba(200,150,30,0.15);color:var(--gold);}
 .quiz-type-badge.type-ox{background:rgba(39,174,96,0.15);color:#2ecc71;}
-.quiz-q{font-family:'Zen Kaku Gothic New',sans-serif;font-weight:700;font-size:clamp(16px,4vw,20px);line-height:1.6;margin-bottom:24px;color:var(--text);}
+.quiz-q{font-family:'Zen Kaku Gothic New',sans-serif;font-weight:700;font-size:clamp(16px,4vw,20px);line-height:1.6;margin-bottom:24px;color:var(--text);min-height:1.6em;transition:opacity 0.35s ease;}
+.quiz-q.fade-out{opacity:0;}
+.quiz-q.hidden{display:none;}
 .choices{display:flex;flex-direction:column;gap:10px;}
 .choice-btn{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 18px;text-align:left;font-family:'Noto Sans JP',sans-serif;font-size:14px;color:var(--text);cursor:pointer;transition:all 0.12s;display:flex;align-items:center;gap:12px;}
 .choice-btn:hover:not(:disabled){background:var(--surface2);border-color:rgba(200,150,30,0.4);transform:translateX(3px);}
@@ -118,13 +120,34 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
 .ox-btn.correct{background:rgba(39,174,96,0.15);border-color:#27ae60;}
 .ox-btn.wrong{background:rgba(192,57,43,0.15);border-color:#c0392b;}
 
-.feedback-bar{margin-top:16px;padding:12px 16px;border-radius:4px;font-size:13px;font-weight:700;opacity:0;transition:opacity 0.2s;min-height:44px;}
-.feedback-bar.show{opacity:1;}
-.feedback-bar.ok{background:rgba(39,174,96,0.15);color:#2ecc71;border:1px solid rgba(39,174,96,0.3);}
-.feedback-bar.ng{background:rgba(192,57,43,0.12);color:#e74c3c;border:1px solid rgba(192,57,43,0.3);}
-.next-btn{margin-top:16px;width:100%;padding:12px;background:var(--gold);color:#1a1008;font-family:'Zen Kaku Gothic New',sans-serif;font-weight:900;font-size:15px;border:none;border-radius:4px;cursor:pointer;transition:background 0.15s;display:none;}
-.next-btn.show{display:block;}
-.next-btn:hover{background:var(--gold2);}
+/* ===== BUZZER (回答する！) ===== */
+.buzz-btn{display:block;width:100%;margin-top:8px;padding:20px;background:linear-gradient(135deg,var(--amber),var(--gold));color:#1a1008;font-family:'Zen Kaku Gothic New',sans-serif;font-weight:900;font-size:clamp(18px,5vw,22px);letter-spacing:0.1em;border:none;border-radius:6px;cursor:pointer;box-shadow:0 6px 20px rgba(224,120,32,0.3);transition:transform 0.1s,box-shadow 0.15s;}
+.buzz-btn:hover{box-shadow:0 8px 28px rgba(224,120,32,0.45);}
+.buzz-btn:active{transform:scale(0.97);}
+.buzz-btn.hidden{display:none;}
+
+/* ===== CHOICES VISIBILITY ===== */
+#quiz-choices.quiz-choices-hidden{display:none;}
+
+/* ===== TOP に戻る（選択肢画面） ===== */
+.quiz-top-back{display:none;width:100%;margin-top:18px;padding:11px;background:none;color:var(--text2);font-family:'Share Tech Mono',monospace;font-size:12px;letter-spacing:0.08em;border:1px solid var(--border);border-radius:4px;cursor:pointer;transition:all 0.15s;}
+.quiz-top-back.show{display:block;}
+.quiz-top-back:hover{border-color:var(--gold);color:var(--gold);}
+
+/* ===== RESULT OVERLAY (正誤オーバーレイ) ===== */
+.result-overlay{position:fixed;inset:0;z-index:9998;display:flex;align-items:center;justify-content:center;padding:24px;background:rgba(10,6,2,0.72);backdrop-filter:blur(4px);opacity:0;visibility:hidden;transition:opacity 0.25s,visibility 0.25s;}
+.result-overlay.show{opacity:1;visibility:visible;}
+.result-overlay-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:32px 28px;width:100%;max-width:420px;text-align:center;transform:translateY(16px) scale(0.97);transition:transform 0.25s;box-shadow:0 20px 60px rgba(0,0,0,0.5);}
+.result-overlay.show .result-overlay-card{transform:translateY(0) scale(1);}
+.ro-icon{font-size:52px;line-height:1;margin-bottom:10px;}
+.ro-title{font-family:'Zen Kaku Gothic New',sans-serif;font-weight:900;font-size:28px;margin-bottom:12px;}
+.ro-title.ok{color:#2ecc71;}
+.ro-title.ng{color:#e74c3c;}
+.ro-detail{font-size:14px;line-height:1.7;color:var(--text2);margin-bottom:24px;min-height:20px;}
+.ro-detail strong{color:var(--gold2);}
+.ro-next{width:100%;padding:14px;background:var(--gold);color:#1a1008;font-family:'Zen Kaku Gothic New',sans-serif;font-weight:900;font-size:16px;border:none;border-radius:5px;cursor:pointer;transition:background 0.15s,transform 0.1s;}
+.ro-next:hover{background:var(--gold2);}
+.ro-next:active{transform:scale(0.98);}
 
 /* ===== RESULT ===== */
 #screen-result{min-height:100vh;display:none;flex-direction:column;align-items:center;padding:40px 20px 60px;}
@@ -264,9 +287,19 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
   <div class="quiz-body">
     <div class="quiz-type-badge" id="quiz-type-badge">4択</div>
     <div class="quiz-q" id="quiz-q"></div>
-    <div id="quiz-choices"></div>
-    <div class="feedback-bar" id="feedback-bar"></div>
-    <button class="next-btn" id="next-btn" onclick="nextQuestion()">次の問題へ →</button>
+    <button class="buzz-btn" id="buzz-btn" onclick="buzz()">回答する！</button>
+    <div id="quiz-choices" class="quiz-choices-hidden"></div>
+    <button class="quiz-top-back" id="quiz-top-back" onclick="quitToTop()">🏠 TOP画面に戻る</button>
+  </div>
+</div>
+
+<!-- ===== RESULT OVERLAY (正誤オーバーレイ) ===== -->
+<div class="result-overlay" id="result-overlay">
+  <div class="result-overlay-card">
+    <div class="ro-icon" id="ro-icon">✅</div>
+    <div class="ro-title ok" id="ro-title">正解！</div>
+    <div class="ro-detail" id="ro-detail"></div>
+    <button class="ro-next" id="ro-next" onclick="nextQuestion()">次の問題へ →</button>
   </div>
 </div>
 
@@ -545,6 +578,9 @@ let answered = false;
 let wrongAnswers = [];
 let playerName = '';
 let currentRankingGenre = null;
+let typingTimeout = null;
+let toastTimeout = null;
+const TYPING_SPEED = 100; // 1文字あたりのミリ秒
 
 // ============================================================
 //  UTILS
@@ -568,7 +604,15 @@ function showToast(msg, duration = 2500) {
   const t = document.getElementById('toast');
   t.textContent = msg;
   t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), duration);
+  clearTimeout(toastTimeout);
+  if (duration > 0) {
+    toastTimeout = setTimeout(() => t.classList.remove('show'), duration);
+  }
+}
+
+function hideToast() {
+  clearTimeout(toastTimeout);
+  document.getElementById('toast').classList.remove('show');
 }
 
 // ============================================================
@@ -646,30 +690,87 @@ function showQuestion() {
   document.getElementById('quiz-qnum').textContent = `Q${qIndex + 1} / 10`;
   document.getElementById('quiz-progress-fill').style.width = `${(qIndex / 10) * 100}%`;
   document.getElementById('quiz-score').textContent = `${score} pt`;
-  document.getElementById('feedback-bar').className = 'feedback-bar';
-  document.getElementById('feedback-bar').textContent = '';
-  document.getElementById('next-btn').className = 'next-btn';
 
+  // --- 状態リセット ---
+  const qEl = document.getElementById('quiz-q');
+  const buzzBtn = document.getElementById('buzz-btn');
+  const choicesEl = document.getElementById('quiz-choices');
+  const topBack = document.getElementById('quiz-top-back');
+
+  qEl.classList.remove('fade-out', 'hidden');
+  buzzBtn.classList.remove('hidden');
+  choicesEl.classList.add('quiz-choices-hidden');
+  choicesEl.innerHTML = '';
+  topBack.classList.remove('show');
+
+  // --- タイプ種別バッジ ---
   if (q.type === '4') {
     document.getElementById('quiz-type-badge').textContent = '4択';
     document.getElementById('quiz-type-badge').className = 'quiz-type-badge type-4';
-    document.getElementById('quiz-q').textContent = q.q;
-    const labels = ['A', 'B', 'C', 'D'];
-    document.getElementById('quiz-choices').innerHTML = q.c.map((c, i) =>
-      `<button class="choice-btn" onclick="answer4(${i})">
-        <span class="choice-label">${labels[i]}</span>${c}
-       </button>`
-    ).join('');
   } else {
     document.getElementById('quiz-type-badge').textContent = '○×';
     document.getElementById('quiz-type-badge').className = 'quiz-type-badge type-ox';
-    document.getElementById('quiz-q').textContent = q.q;
-    document.getElementById('quiz-choices').innerHTML = `
+  }
+
+  // --- タイプライターで問題文を表示 ---
+  typeQuestion(q.q);
+}
+
+// 問題文をタイプライター表示（1文字 TYPING_SPEED ミリ秒）
+function typeQuestion(text) {
+  clearTimeout(typingTimeout);
+  const qEl = document.getElementById('quiz-q');
+  qEl.textContent = '';
+  let i = 0;
+  (function step() {
+    if (i < text.length) {
+      qEl.textContent += text[i++];
+      typingTimeout = setTimeout(step, TYPING_SPEED);
+    }
+  })();
+}
+
+// 「回答する！」押下：タイプ停止 → 問題文フェードアウト＆非表示 → 選択肢表示
+function buzz() {
+  if (answered) return;
+  clearTimeout(typingTimeout);
+  const qEl = document.getElementById('quiz-q');
+  document.getElementById('buzz-btn').classList.add('hidden');
+  qEl.classList.add('fade-out');
+  setTimeout(() => {
+    if (!document.getElementById('screen-quiz').classList.contains('active')) return;
+    qEl.classList.add('hidden');
+    renderChoices();
+  }, 350); // CSS transition(0.35s)に合わせる
+}
+
+// 選択肢ボタンを描画して表示（＋TOPに戻るボタン表示）
+function renderChoices() {
+  const q = questions[qIndex];
+  const choicesEl = document.getElementById('quiz-choices');
+  if (q.type === '4') {
+    const labels = ['A', 'B', 'C', 'D'];
+    choicesEl.innerHTML = '<div class="choices">' + q.c.map((c, i) =>
+      `<button class="choice-btn" onclick="answer4(${i})"><span class="choice-label">${labels[i]}</span>${c}</button>`
+    ).join('') + '</div>';
+  } else {
+    choicesEl.innerHTML = `
       <div class="ox-choices">
         <button class="ox-btn" onclick="answerOX(true)">⭕<span>正しい</span></button>
         <button class="ox-btn" onclick="answerOX(false)">❌<span>誤り</span></button>
       </div>`;
   }
+  choicesEl.classList.remove('quiz-choices-hidden');
+  document.getElementById('quiz-top-back').classList.add('show');
+}
+
+// 選択肢画面から TOP に戻る
+function quitToTop() {
+  clearInterval(timer);
+  clearTimeout(typingTimeout);
+  hideToast();
+  document.getElementById('result-overlay').classList.remove('show');
+  showScreen('screen-top');
 }
 
 function answer4(idx) {
@@ -697,25 +798,52 @@ function answerOX(val) {
 }
 
 function processAnswer(isCorrect, correctAns, qText) {
-  const fb = document.getElementById('feedback-bar');
+  // --- スコア・時間処理 ---
   if (isCorrect) {
     score += 10;
     correctCount++;
     timeLeft = Math.min(timeLeft + 5, 999);
-    fb.textContent = '✅ 正解！ ＋5秒';
-    fb.className = 'feedback-bar ok show';
   } else {
     wrongCount++;
     timeLeft = Math.max(timeLeft - 5, 0);
-    fb.textContent = `❌ 正解は「${correctAns}」（−5秒）`;
-    fb.className = 'feedback-bar ng show';
     wrongAnswers.push({ q: qText, a: correctAns });
   }
+  document.getElementById('quiz-score').textContent = `${score} pt`;
   updateTimerDisplay();
-  document.getElementById('next-btn').className = 'next-btn show';
+  document.getElementById('quiz-top-back').classList.remove('show');
+
+  // --- 問題文を全文でフェードイン再表示 ---
+  const qEl = document.getElementById('quiz-q');
+  qEl.textContent = qText;
+  qEl.classList.remove('hidden');
+  void qEl.offsetWidth; // reflow
+  qEl.classList.remove('fade-out');
+
+  // --- 正解ならトースト（「次の問題へ」で消す） ---
+  if (isCorrect) {
+    showToast('✅ 正解！+10点+5秒', 0);
+  }
+
+  // --- 0.6秒後に正誤オーバーレイ ---
+  setTimeout(() => showResultOverlay(isCorrect, correctAns), 600);
+}
+
+function showResultOverlay(isCorrect, correctAns) {
+  // タイムアップ等で結果画面に遷移済みなら表示しない
+  if (!document.getElementById('screen-quiz').classList.contains('active')) return;
+  document.getElementById('ro-icon').textContent = isCorrect ? '✅' : '❌';
+  const title = document.getElementById('ro-title');
+  title.textContent = isCorrect ? '正解！' : '不正解…';
+  title.className = 'ro-title ' + (isCorrect ? 'ok' : 'ng');
+  document.getElementById('ro-detail').innerHTML = isCorrect
+    ? '＋10点 ／ 時間 ＋5秒'
+    : `正解は <strong>${correctAns}</strong><br>時間 −5秒`;
+  document.getElementById('result-overlay').classList.add('show');
 }
 
 function nextQuestion() {
+  hideToast(); // 「次の問題へ」を押した瞬間にトーストを消す
+  document.getElementById('result-overlay').classList.remove('show');
   qIndex++;
   if (qIndex >= 10) {
     clearInterval(timer);
@@ -727,6 +855,9 @@ function nextQuestion() {
 
 function endGame() {
   clearInterval(timer);
+  clearTimeout(typingTimeout);
+  hideToast();
+  document.getElementById('result-overlay').classList.remove('show');
   const bonus = Math.max(timeLeft, 0);
   const total = score + bonus;
   const medal = correctCount >= 9 ? '🥇' : correctCount >= 7 ? '🥈' : correctCount >= 5 ? '🥉' : '😅';
