@@ -236,7 +236,7 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
     <h1 class="top-title">お酒<span>クイズ</span>道場</h1>
     <p class="top-sub">SAKE / WINE / BEER / WHISKY / COCKTAIL</p>
     <div class="top-rule">
-      📋 制限時間：<strong>120秒</strong> ／ 各ジャンル<strong>10問</strong>ランダム出題<br>
+      📋 制限時間：<strong>60秒</strong> ／ 各ジャンル<strong>10問</strong>ランダム出題<br>
       ✅ 正解 → <strong>+10点</strong> ＋ 時間+5秒<br>
       ❌ 不正解 → 減点なし ＋ 時間−5秒のペナルティ<br>
       🏆 残り時間がそのままボーナス点に加算！<br>
@@ -261,7 +261,7 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
     <div class="intro-genre-name" id="intro-name"></div>
     <div class="intro-genre-desc" id="intro-desc"></div>
     <div class="intro-rule">
-      制限時間：<strong>120秒</strong> ／ 10問ランダム出題（4択＋○×ミックス）<br>
+      制限時間：<strong>60秒</strong> ／ 10問ランダム出題（4択＋○×ミックス）<br>
       ✅ 正解 → <strong>+10点</strong> ＋ 時間+5秒<br>
       ❌ 不正解 → 減点なし ＋ 時間−5秒<br>
       🏆 残り時間がそのままボーナス点に加算
@@ -280,7 +280,7 @@ body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellips
     <div class="quiz-progress"><div class="quiz-progress-fill" id="quiz-progress-fill" style="width:0%"></div></div>
     <div class="quiz-score" id="quiz-score">0 pt</div>
     <div class="quiz-timer-wrap">
-      <div class="quiz-timer" id="quiz-timer">120</div>
+      <div class="quiz-timer" id="quiz-timer">60</div>
       <div class="quiz-timer-label">秒</div>
     </div>
   </div>
@@ -572,7 +572,7 @@ let qIndex = 0;
 let score = 0;
 let correctCount = 0;
 let wrongCount = 0;
-let timeLeft = 120;
+let timeLeft = 60;
 let timer = null;
 let answered = false;
 let wrongAnswers = [];
@@ -580,7 +580,7 @@ let playerName = '';
 let currentRankingGenre = null;
 let typingTimeout = null;
 let toastTimeout = null;
-const TYPING_SPEED = 100; // 1文字あたりのミリ秒
+const TYPING_SPEED = 120; // 1文字あたりのミリ秒
 
 // ============================================================
 //  UTILS
@@ -666,7 +666,7 @@ function retryGame() {
 
 function startTimer() {
   clearInterval(timer);
-  timeLeft = 120;
+  timeLeft = 60;
   updateTimerDisplay();
   timer = setInterval(() => {
     timeLeft--;
